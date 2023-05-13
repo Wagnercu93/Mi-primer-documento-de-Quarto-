@@ -1,0 +1,876 @@
+---
+title: "Mi primer Quarto"
+author: "Wagner Chacón Ulate"
+format: 
+  html: 
+    toc: true
+    toc_float: true
+editor: visual
+---
+
+## Introducción:
+
+Base de datos Dt y demas. E instalación de paquetes. \`
+
+## Datos:
+
+### Libreria 1:
+
+```{r}
+#| label: libreria 1 
+#| include: true
+#| echo: false
+
+library(tidyverse)
+```
+
+### Libreria 2:
+
+```{r}
+#| label: libreria 2 
+#| include: true
+#| echo: false
+
+library(plotly)
+```
+
+```{r}
+#| label: 142 paises
+#| include: true
+#| echo: false 
+
+library(gapminder)
+```
+
+```{r}
+#| label: DT
+#| include: true
+#| echo: false
+
+library(DT)
+```
+
+### Datos COVID Costa Rica
+
+```{r}
+#| label: COVID Costa Rica 
+#| include: true 
+#| echo: false 
+
+covid_general <-
+  read_delim(
+    file = "https://raw.githubusercontent.com/gf0604-procesamientodatosgeograficos/2023-i/main/datos/ministerio-salud/covid/05_30_22_CSV_GENERAL.csv",
+    col_select = c(
+      "FECHA",
+      "positivos",
+      "activos",
+      "RECUPERADOS",
+      "fallecidos",
+      "nue_posi",
+      "nue_falleci",
+      "salon",
+      "UCI"
+    )
+)
+```
+
+### Delitos Costa Rica
+
+```{r}
+#| label: Delitos Costa Rica
+#| include: true 
+#| echo: false 
+
+delitos_2022 <-
+ read_delim(
+    file = "https://raw.githubusercontent.com/gf0604-procesamientodatosgeograficos/2023-i/main/datos/oij/estadisticas-policiales/estadisticaspoliciales2022.csv"
+  )
+```
+
+## Tablas de contenidos de los paquetes:
+
+En estas tablas estan disponibles diversas caracteristicas de los paquetes de automoviles y de diamantes.
+
+### Automoviles disponibles:
+
+```{r}
+#| label: Tabla automoviles
+#| include: true
+#| echo: false 
+
+mpg |>
+  datatable(
+    options = list(
+      pageLength = 5,
+      language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+    )
+)
+```
+
+### Clasificación de diamantes:
+
+```{r}
+#| label: Diamantes
+#| include: true 
+#| echo: false 
+
+diamonds |>
+  datatable(
+    options = list(
+      pageLength = 5,
+      language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+    )
+)
+```
+
+### Otra tabla:
+
+```{r}
+#| label: 142 naciones 
+#| include: true 
+#| echo: false 
+
+gapminder |>
+ filter(year == 2007) |> # filtro para el año 2007
+ datatable(
+   options = list(
+     pageLength = 5,
+     language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+   )
+)
+```
+
+### Caso tabla COVID Costa Rica:
+
+En este caso hay que aplicar un cambio de nombre a algunas columnas del Datafrme.
+
+```{r}
+#| label: renonvre de columnas
+#| include: true
+#| echo: false 
+
+covid_general |>
+  rename(
+    fecha = FECHA,
+    recuperados = RECUPERADOS,
+    nuevos_positivos = nue_posi,
+    nuevos_fallecidos = nue_falleci,
+    uci = UCI
+)
+```
+
+Ahora, creamos ka tabla para covid Costa Rica
+
+```{r}
+#| label: Tabla COVID Costa Rica 
+#| include: true
+#! echo: false 
+
+covid_general |>
+  datatable(
+    options = list(
+      pageLength = 5,
+      language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+    )
+)
+```
+
+### Tabla de Delitos Costa Rica:
+
+```{r}
+#| label: Tabla delitos CR 
+#| include: true
+#| echo: false 
+
+delitos_2022 |>
+  datatable(
+    options = list(
+      pageLength = 5,
+      language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json')
+  )
+)
+```
+
+## GRAFICOS
+
+### Grafico de cilindrada:
+
+Se muestra un grafico de la cilindrada según el modelo del vehiculo.
+
+```{r}
+#| label: Cilindrada 
+#| include: true 
+#| echo: false 
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+### Cilindrada vrs milla por galón:
+
+Se muestra un grafico de relacuión de los galómes de combustile consumidos por milla y el cilindrado del modelo del vehiculo.
+
+```{r}
+#| label: Cilinrada y millas
+#| include: true
+#| echo: false 
+
+mpg |>
+  ggplot(aes(x = displ, y = hwy, shape = class, color = class)) +
+  geom_point() +
+  scale_shape_manual(values = c(0, 1, 2, 3, 4, 5, 6)) +
+  scale_color_manual(values = c("red", "blue", "green", "purple", "orange", "brown", "pink"))
+```
+
+### Varias variables
+
+. varias variables o "capas" en un solo grafico.
+
+```{r}
+#| label: varias variables 
+#| include: true 
+#| echo: false 
+
+mpg |>
+  ggplot(aes(x = displ, y = hwy, color = drv)) +
+  geom_point() +
+  geom_smooth()
+
+```
+
+Se coloria el grafico, segun el tipo de traccion de los autos
+
+### Grafico con paneles:
+
+¿Y si combinamos varios temas y datos en un solo grafico, pero sin comprometer sus interpretaciónes y su facilidad? Para eso esta el grafico con paneles
+
+```{r}
+#| label: disperción millas y cilindrada
+#| include: true
+#| echo: false 
+
+mpg |>
+  ggplot(aes(x = displ, y = hwy, color = drv)) +
+  geom_point() +
+  geom_smooth() +
+  ggtitle("Cilindrada vs rendimiento en autopista por tipo de tracción") +
+  xlab("Cilindrada (l)") +
+  ylab("Rendimiento en autopista (mpg)") +
+  labs(subtitle = "Datos de 38 modelos de automóviles de años entre 1999 y 2008", 
+       caption = "Fuente: United States Environmental Protection Agency (EPA)",
+       color = "Tipo de tracción")
+```
+
+## Con Plot 2
+
+### Mismo grafico con Plot 2
+
+```{r}
+#| label: rendimiento
+#| include: true
+#| echo: false 
+
+mpg |>
+  ggplot(aes(x = displ, y = hwy, color = drv)) +
+  geom_point() +
+  geom_smooth() +
+  ggtitle("Cilindrada vs rendimiento en autopista") +
+  xlab("Cilindrada (l)") +
+  ylab("Rendimiento en autopista (mpg)") +
+  labs(subtitle = "Datos de 38 modelos de automóviles de años entre 1999 y 2008", 
+       caption = "Fuente: United States Environmental Protection Agency (EPA)",
+       color = "Tipo de tracción") +
+  theme_bw() # tema de ggplot2
+```
+
+# Agregando más opciones visuales a los graficos.
+
+```{r}
+#| label: Instalacion 
+#| include: true 
+#| echo: false 
+
+library(ggthemes)
+```
+
+## Grafico con opciones visuales
+
+```{r}
+#| label: millas y rendimiento
+#| include: true
+#| echo: false 
+
+mpg |>
+  ggplot(aes(x = displ, y = hwy, color = drv)) +
+  geom_point() +
+  geom_smooth() +
+  ggtitle("Cilindrada vs rendimiento en autopista") +
+  xlab("Cilindrada (l)") +
+  ylab("Rendimiento en autopista (mpg)") +
+  labs(subtitle = "Datos de 38 modelos de automóviles de años entre 1999 y 2008", 
+       caption = "Fuente: United States Environmental Protection Agency (EPA)",
+       color = "Tipo de tracción") +
+  theme_economist() # estilo de ggthemes
+```
+
+```{r}
+#| label: otro paquete 
+#| include: true
+#| echo: false
+
+library(hrbrthemes)
+```
+
+## Coloriado por diversas etiquetas.
+
+```{r}
+#| label: Coloriado 
+#| include: true
+#| echo: false 
+
+mpg |>
+  ggplot(aes(x = displ, y = hwy, color = drv)) +
+  geom_point() +
+  geom_smooth() +
+  ggtitle("Cilindrada vs rendimiento en autopista") +
+  xlab("Cilindrada (l)") +
+  ylab("Rendimiento en autopista (mpg)") +
+  labs(subtitle = "Datos de 38 modelos de automóviles de años entre 1999 y 2008", 
+       caption = "Fuente: United States Environmental Protection Agency (EPA)",
+       color = "Tipo de tracción") +
+  theme_ipsum() # tema de hrbrthemes
+```
+
+## Grafico de disperción: diamantes y sus kilates.
+
+En este grafico de dispercion se muestra la relación de los pesos y los kilates y los diamantes.
+
+```{r}
+#| label: Kilates
+#| include: true
+#| echo: false 
+
+diamonds |>
+  ggplot(aes(x = carat, y = price, color = clarity)) +
+  geom_point() +
+  ggtitle("Peso vs precio de diamantes") +
+  xlab("Peso (quilates)") +
+  ylab("Precio ($ EE.UU.)") +
+  labs(color = "Claridad\n(I1=peor IF=mejor)") +
+  scale_colour_brewer(palette = "YlOrBr", direction = -1) +
+  theme_ipsum() # estilo de hrbrthemes
+```
+
+## Conversión de graficos
+
+```{r}
+#| label: coversion 
+#| include: true
+#| echo: false
+
+grafico_ggplot2 <-
+  mpg |>
+  ggplot(aes(x = displ, y = hwy, color = drv)) +
+  geom_point(aes(
+    # datos que se muestran al colocar el ratón sobre un punto
+    text = paste0(
+      "Modelo: ", manufacturer, " ", model, " ", year, "\n",
+      "Cilindrada: ", displ, " l", "\n",
+      "Rendimiento en autopista: ", hwy, " mpg", "\n",
+      "Tipo de tracción: ", drv
+    )
+  )) +
+  geom_smooth() +
+  ggtitle("Cilindrada vs rendimiento en autopista") +
+  xlab("Cilindrada (l)") +
+  ylab("Rendimiento en autopista (mpg)") +
+  labs(subtitle = "Datos de 38 modelos de automóviles de años entre 1999 y 2008",
+       caption = "Fuente: United States Environmental Protection Agency (EPA)",
+       color = "Tipo de tracción") +
+  theme_ipsum()
+```
+
+```{r}
+#| label: creacion
+#| include: true
+#| echo: false 
+
+ggplotly(grafico_ggplot2, tooltip = "text") |> 
+  config(locale = 'es') # para mostrar los controles en español
+```
+
+# Otros graficos
+
+## Histograma
+
+El ejemplo es un histograma de el PIB (producto interno bruto) per capita, es decir la cantidad de dinero que en teoria le tocaria a cada érsona en un país.
+
+```{r}
+#| label: histograma PIB 
+#| #| include: true 
+#| echo: false
+
+histograma_ggplot2 <- 
+  gapminder |>
+  filter(year == 2007) |>
+  ggplot(aes(x = gdpPercap)) +
+  geom_histogram(
+    aes(
+      text = paste0(
+        "PIB per cápita (valor medio del rango): $", round(after_stat(x), 2), "\n",
+        "Frecuencia: ", after_stat(count)
+      )
+    ), 
+    bins = 10
+  ) + 
+  ggtitle("Distribución del PIB per cápita en 2007") +
+  xlab("PIB per cápita ($ EE.UU.)") +
+  ylab("Frecuencia") +
+  labs(subtitle = "Datos de 14o países", caption = "Fuente: Gapminder.org") +
+  theme_economist()
+```
+
+```{r}
+#| label: histograma plot 2
+#| include: true
+#| echo: false 
+
+ggplotly(histograma_ggplot2, tooltip = "text") |> 
+  config(locale = 'es')
+```
+
+Podemos crear el mismo histograma, pero con la variante del continente
+
+```{r}
+#| label: PIB por continente 
+#| include: true
+#| echo: false 
+
+histograma_ggplot2 <-
+  gapminder |>
+  filter(year == 2007) |>
+  ggplot(aes(x = gdpPercap, fill = continent)) +
+  geom_histogram(
+    aes(
+      text = paste0(
+        "Continente: ", after_stat(fill), "\n",
+        "PIB per cápita (valor medio del rango): $", round(after_stat(x), 2), "\n",
+        "Frecuencia: ", after_stat(count)
+      ),      
+      y = after_stat(density)
+    ),    
+    bins = 10
+  ) +
+  ggtitle("Distribución del PIB per cápita en 2007 por continente") +
+  xlab("PIB per cápita ($ EE.UU.)") +
+  ylab("Densidad") +
+  labs(subtitle = "Datos de 140 países",
+       caption = "Fuente: Gapminder.org",
+       fill = "Continente") +
+  theme_economist()
+
+# Histograma plotly
+ggplotly(histograma_ggplot2, tooltip = "text") |>
+  config(locale = 'es')
+```
+
+por últino, en este histograma final, vemos la distribución de el PIB segun continente, es decir el pais mas rico al mas pobre de cada continente.
+
+```{r}
+#| label: PIB ordenado por continente
+#| include: true
+#| echo: false 
+
+histograma_ggplot2 <-
+  gapminder |>
+  filter(year == 2007) |>
+  ggplot(aes(x = gdpPercap)) +
+  geom_histogram(
+    aes(
+      text = paste0(
+        "PIB per cápita (valor medio del rango): $", round(after_stat(x), 2), "\n",
+        "Frecuencia: ", after_stat(count)
+      )
+    ),
+    bins = 10
+  ) +
+  ggtitle("Distribución del PIB per cápita en 2007 por continente") +
+  xlab("PIB per cápita ($ EE.UU.)") +
+  ylab("Frecuencia") +
+  labs(subtitle = "Datos de 140 países",
+       caption = "Fuente: Gapminder.org",
+       fill = "Continente") +
+  facet_wrap(~ continent, nrow = 2) +
+  theme_economist()
+
+# Histograma plotly
+ggplotly(histograma_ggplot2, tooltip = "text") |>
+  config(locale = 'es')
+```
+
+## Graficos de caja:
+
+Siguiendo con el tema del PIB, veamos un grafico de caja, un grafico donde las barras muestran varias aristas de informacion.
+
+```{r}
+#| label: PIB 2007
+#| include: true
+#| echo: false
+
+grafico_caja_ggplot2 <-
+gapminder |>
+  filter(year == 2007) |>
+  ggplot(aes(x = continent, y = gdpPercap)) +
+  geom_boxplot() +
+  ggtitle("Distribución del PIB per cápita en 2007 por continente") +
+  ylab("PIB per cápita ($ EE.UU.)") +
+  labs(subtitle = "Datos de 140 países", caption = "Fuente: Gapminder.org") +
+  theme_economist()
+```
+
+```{r}
+#| label: caja PIB 2007
+#| include: true
+#| echo: FALSE
+
+ggplotly(grafico_caja_ggplot2) |> 
+  config(locale = 'es')
+```
+
+## Grafico de barras:
+
+El clasico grafico de barras hecho de manera interactiva y mostrando diversas opciones de datos.
+
+```{r}
+#| label: grafico de barras
+#| include: true
+#| echo: false
+
+grafico_barras_ggplot2 <-
+gapminder |>
+  filter(year == 2007) |>
+  ggplot(aes(x = fct_infreq(continent))) +
+  geom_bar(
+    aes(
+      text = paste0(
+        "Cantidad de países: ", after_stat(count)
+      )
+    )    
+  ) +
+  ggtitle("Cantidad de países por continente") +
+  xlab("Continente") +
+  ylab("Cantidad de países") +
+  labs(caption = "Fuente: Gapminder.org") +
+  theme_economist()
+
+```
+
+```{r}
+#| label: barras plotly2
+#| include: true
+#| echo: false 
+
+ggplotly(grafico_barras_ggplot2, tooltip = "text") |> 
+  config(locale = 'es')
+```
+
+Se pueden crear en otro orden, por ejemplo estos de diamantes. Clasificados segun su corte.
+
+```{r}
+#| label: Corte 
+#| include: true
+#| echo: false 
+
+grafico_barras_ggplot2 <-
+diamonds |>
+  ggplot(aes(x = fct_rev(cut))) +
+  geom_bar(
+    aes(
+      text = paste0(
+        "Cantidad de diamantes: ", after_stat(count)
+      )
+    )
+  ) +
+  ggtitle("Cantidad de diamantes por corte") +
+  xlab("Corte") +
+  ylab("Cantidad de diamantes") +
+  theme_economist()
+```
+
+```{r}
+#| label: grafico corte
+#| include: true
+#| echo: false 
+
+ggplotly(grafico_barras_ggplot2, tooltip = "text") |> 
+  config(locale = 'es')
+```
+
+Grafico de esperanza de vida.
+
+```{r}
+#| label: esperanza de vida
+#| include: true
+#| echo: false 
+
+grafico_esperanza_de_vida_ggplot2 <-
+  gapminder |>
+  filter(year == 2007) |>
+  ggplot(aes(x = fct_infreq(continent), y = lifeExp)) +
+  geom_bar(
+    stat = "summary", 
+    fun.y = "mean",
+    aes(
+      text = paste0(
+        "Promedio de esperanza de vida: ", round(after_stat(y), 2)
+      )
+    )
+  ) +
+  ggtitle("Promedio de esperanza de vida por continente en 2007") +
+  xlab("Continente") +
+  ylab("Promedio de esperanza de vida") +
+  labs(caption = "Fuente: Gapminder.org") +
+  theme_economist()
+
+```
+
+```{r}
+#| label: Grafico esperanza 2007
+#| include: true
+#| echo: false
+
+ggplotly(grafico_esperanza_de_vida_ggplot2, tooltip = "text") |>
+  config(locale = 'es')
+```
+
+Ahora, calculamos varias funciones de los graficos de barras con diversas funciones. Usando el promedio de esperanza de vida.
+
+Calculo de esperanza de vida por continente en el año 2007.
+
+```{r}
+#| label: calculo
+#| include: true
+#| echo: false
+
+gapminder_mean_lifeExp_continent <-
+  gapminder |>
+  filter(year == 2007) |>
+  group_by(continent) |>
+  summarize(lifeExp_mean = mean(lifeExp))
+```
+
+```{r}
+#| label: Muestra 
+#| include: true 
+#| echo: false 
+
+gapminder_mean_lifeExp_continent |>
+  arrange(desc(lifeExp_mean))
+```
+
+```{r}
+#| label: vida 2007 
+#| include: true
+#| echo: false 
+
+grafico_2007_ggplot2 <-
+  gapminder_mean_lifeExp_continent |>
+  ggplot(aes(x = reorder(continent,-lifeExp_mean), y = lifeExp_mean)) +
+  geom_col(
+    aes(
+      text = paste0(
+        "Promedio de esperanza de vida: ", round(after_stat(y), 2)
+      )
+    )    
+  ) +
+  ggtitle("Promedio de esperanza de vida por continente en 2007") +
+  xlab("Continente") +
+  ylab("Promedio de esperanza de vida") +
+  labs(caption = "Fuente: Gapminder.org") +
+  theme_economist()
+```
+
+-   
+
+```{r}
+#| label: en 2007
+#| include: true
+#| echo: false
+
+ggplotly(grafico_2007_ggplot2, tooltip = "text") |>
+  config(locale = 'es')
+```
+
+## Graficos sin restricciones
+
+No es necesario tener un tamaño establecido, por erso, se adapta por los datos.
+
+En este caso, vemos la cantidad de pobladores de las naciones en Ámerica en 2007, contadas por millones de habitantes.
+
+```{r}
+#| label: poblacione en America 
+#| include: true
+#| echo: false 
+
+esperanza_2007_america_ggplot2 <-
+gapminder |>
+  filter(year == 2007 & continent == "Americas") |>
+  ggplot(aes(x = reorder(country, pop), y = pop/1000000)) +
+  geom_col(
+    aes(
+      text = paste0(
+        "País: ", country, "\n",
+        "Población (millones de habitantes): ", round(pop/1000000, 2)
+      )
+    )
+  ) +
+  coord_flip() + # para mostrar barras horizontales
+  ggtitle("Población de países de América en 2007") +
+  xlab("País") +
+  ylab("Población (millones de habitantes)") +
+  labs(caption = "Fuente: Gapminder.org") +
+  theme_economist()
+```
+
+```{r}
+#| label: grafico poblacion
+#| include: true
+#| echo: false 
+
+ggplotly(esperanza_2007_america_ggplot2, tooltip = "text") |> 
+  config(locale = 'es')
+```
+
+## Graficos agrupados:
+
+Un grafico asi, permite agregar mas variables a una barra, siendo que, da la apariencia a estos de estar apiladas.
+
+Este grafico muestra varias variables en damiantes.
+
+```{r}
+#| label: diamantes 
+#| include: true 
+#| echo: false 
+
+grafico_diamantes_variados_ggplot2 <-
+diamonds |>
+  ggplot(aes(x = cut, fill = clarity)) +
+  geom_bar() +
+  ggtitle("Cantidad de diamantes por corte y claridad") +
+  xlab("Corte") +
+  ylab("Cantidad de diamantes") +
+  labs(fill = "Claridad") +
+  theme_minimal()
+```
+
+```{r}
+#| label: varios diamantes
+#| include: true
+#| echo: false 
+
+ggplotly(grafico_diamantes_variados_ggplot2) |> 
+  config(locale = 'es')
+```
+
+Aun asi, podemos darle una apariencia mas uniforme a las graficaciones de barras apiladas
+
+```{r}
+#| label: diamantes unificados
+#| include: true 
+#| echo: false 
+
+grafico_diamantes_cortes_y_mas <-
+diamonds |>
+  ggplot(aes(x = cut, fill = clarity)) +
+  geom_bar(position = "fill") +
+  ggtitle("Proporción de tipos de claridad en cortes de diamantes") +
+  xlab("Corte") +
+  ylab("Proporción") +
+  labs(fill = "Claridad") +
+  theme_minimal()
+```
+
+```{r}
+#| label: far
+#| include: true
+#| echo: false 
+
+ggplotly(grafico_diamantes_cortes_y_mas) |> 
+  config(locale = 'es')
+```
+
+## Graficos de disperción:
+
+En estos, se comparan mas variables (numericas en su mayoria). En el siguiente grafico se compara el PIB de los paises con la esperanza de vida.
+
+```{r}
+#| label: PIB y esperanza 2007 
+#| include: true
+#| echo: false
+
+grafico_PIB_y_esperanza_ggplot2 <-
+  gapminder |>
+  filter(year == 2007) |>
+  ggplot(aes(x = gdpPercap, y = lifeExp)) +
+  geom_point(aes(
+    text = paste0(
+      "País: ", country, "\n",
+      "PIB per cápita: $", round(gdpPercap, 2), "\n",
+      "Esperanza de vida: ", round(lifeExp, 2), " años"
+    )
+  )) +
+  geom_smooth(method = "lm") +
+  ggtitle("PIB per cápita vs esperanza de vida en 2007") +
+  xlab("PIB per cápita ($ EE.UU.)") +
+  ylab("Esperanza de vida (años)") +
+  labs(caption = "Fuente: Gapminder.org") +
+  theme_economist()  
+```
+
+```{r}
+#| label: disp PIB y esperanza
+#| include: true 
+#| echo: false 
+
+ggplotly(grafico_PIB_y_esperanza_ggplot2, tooltip = "text") |>
+  config(locale = 'es')
+```
+
+Agreguemos una variable más, como los continentes indicados por colores.
+
+```{r}
+#| label: PIB continentes
+#| include: true 
+#| echo: false 
+
+grafico_PIB_esperanza_continente_ggplot2 <-
+  gapminder |>
+  filter(year == 2007) |>
+  ggplot(aes(x = gdpPercap, y = lifeExp, color = continent)) +
+  geom_point(aes(
+    text = paste0(
+      "País: ", country, "\n",
+      "Continente: ", continent, "\n",
+      "PIB per cápita: $", round(gdpPercap, 2), "\n",
+      "Esperanza de vida: ", round(lifeExp, 2), " años"      
+    )
+  )) +
+  ggtitle("PIB per cápita vs esperanza de vida por continente en 2007") +
+  xlab("PIB per cápita ($ EE.UU.)") +
+  ylab("Esperanza de vida (años)") +
+  labs(caption = "Fuente: Gapminder.org", color = "Continente") +
+  theme_economist()  
+```
+
+```{r}
+#| label: continente y PIB 
+#| include: true
+#| echo: false 
+
+ggplotly(grafico_PIB_esperanza_continente_ggplot2, tooltip = "text") |>
+  config(locale = 'es')
+```
+
+# Conclusión: 
+
+Aunque se instalaron paquetes de COVID Costa Rica y Delitos cometidos en Costa Rica, por diversas situaciones no fue posible usarlos. 
